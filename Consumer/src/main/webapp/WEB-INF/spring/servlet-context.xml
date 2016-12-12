@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+       xmlns:p="http://www.springframework.org/schema/p" xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+	http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+	http://code.alibabatech.com/schema/dubbo        http://code.alibabatech.com/schema/dubbo/dubbo.xsd
+	http://www.springframework.org/schema/tx
+	http://www.springframework.org/schema/tx/spring-tx-4.0.xsd
+	http://www.springframework.org/schema/aop
+	http://www.springframework.org/schema/aop/spring-aop-4.0.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd">
+
+
+    <!-- 消费方应用名，用于计算依赖关系，不是匹配条件，不要与提供方一样 -->
+    <dubbo:application name="consumer-of-Dubbo-SSH-XYSJ" />
+
+    <dubbo:registry protocol="zookeeper" address="127.0.0.1:2181" />
+
+    <dubbo:protocol name="dubbo" port="20880"/>
+
+    <!-- 生成远程服务代理，可以和本地bean一样使用demoService -->
+    <dubbo:reference id="userService" interface="com.cqx.DubboDemo.DemoForMaven.Commons.IServices.UserService" />
+
+    <context:component-scan base-package="com.cqx.DubboDemo.DemoForMaven" />
+
+
+    <mvc:annotation-driven>
+        <mvc:argument-resolvers>
+            <bean class="org.springframework.security.web.method.annotation.AuthenticationPrincipalArgumentResolver" />
+        </mvc:argument-resolvers>
+    </mvc:annotation-driven>
+    <!-- **************************************************************** -->
+    <!--  THYMELEAF-SPECIFIC ARTIFACTS                                    -->
+    <!--  TemplateResolver <- TemplateEngine <- ViewResolver              -->
+    <!-- **************************************************************** -->
+
+    <bean id="servletContext"
+          class="com.cqx.DubboDemo.DemoForMaven.Consumers.Beans.ServletContextFactory"></bean>
+
+    <bean id="templateResolver"
+          class="org.thymeleaf.templateresolver.ServletContextTemplateResolver">
+        <property name="prefix" value="/WEB-INF/templates/" />
+        <property name="suffix" value=".html" />
+        <property name="characterEncoding" value="UTF-8"/>
+        <property name="templateMode" value="HTML5" />
+
+        <constructor-arg ref="servletContext"/>
+    </bean>
+
+    <bean id="templateEngine"
+          class="org.thymeleaf.spring4.SpringTemplateEngine">
+        <property name="templateResolver" ref="templateResolver" />
+    </bean>
+
+    <bean class="org.thymeleaf.spring4.view.ThymeleafViewResolver">
+        <property name="templateEngine" ref="templateEngine" />
+        <property name="characterEncoding" value="UTF-8"/>
+    </bean>
+
+    <!-- Handles HTTP GET requests for /resources/** by efficiently serving up static resources in the ${webappRoot}/resources/ directory -->
+    <mvc:resources mapping="/resources/**" location="/resources/" />
+</beans>
